@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Execute Command</title>
+</head>
+<body>
+    <h1>Execute Command and Display Output</h1>
+
+    <div id="outputContainer">
+        <p>Temperature: <span id="temperatureValue">--</span>C</p>
+        <p>Humidity: <span id="humidityValue">--</span>%</p>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const outputContainer = document.getElementById('outputContainer');
+
+        const socket = io.connect();
+
+        const executeCommand = () => {
+            socket.emit('execute-command');
+        };
+
+        socket.on('command-output', (data) => {
+            const match = data.match(/Temperature:\s*([\d.]+)\s*\nHumidity:\s*([\d.]+)/);
+        
+            if (match) {
+                const temperatureString = match[1];
+                const humidityString = match[2];
+        
+                const temperature = parseFloat(temperatureString);
+                const humidity = parseFloat(humidityString);
+        
+                // Update the HTML elements with the formatted values
+                temperatureValue.textContent = temperature.toFixed(2); // Display temperature with 2 decimal places
+                humidityValue.textContent = humidity.toFixed(2); // Display humidity with 2 decimal places
+            } else {
+                console.error('Data format does not match expected pattern');
+            }
+        });
+        executeCommand();
+        setInterval(executeCommand, 1000);
+    </script>
+</body>
+</html>
